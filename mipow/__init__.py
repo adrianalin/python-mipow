@@ -23,7 +23,7 @@ class mipow:
   def __init__(self, mac):
     self.mac = mac
 
-  def set_state(self, white, red, green, blue, power):
+  def set_state(self, white, red, green, blue):
     self.white = white
     self.red = red
     self.green = green
@@ -47,12 +47,12 @@ class mipow:
   def off(self):
     self.power = False
     packet = bytearray([0x00, 0x00, 0x00, 0x00])
-    self.send_packet(37, packet)
+    self.send_packet(0x1b, packet)
 
   def on(self):
     self.power = True
     packet = bytearray([0xff, 0x00, 0x00, 0x00])
-    self.send_packet(37, packet)
+    self.send_packet(0x1b, packet)
 
   def set_rgb(self, red, green, blue):
     self.red = red
@@ -60,7 +60,7 @@ class mipow:
     self.blue = blue
     self.white = 0
     packet = bytearray([0x00, red, green, blue])
-    self.send_packet(37, packet)
+    self.send_packet(0x1b, packet)
 
   def set_white(self, white):
     self.red = 0
@@ -68,28 +68,29 @@ class mipow:
     self.blue = 0
     self.white = white
     packet = bytearray([white, 0x00, 0x00, 0x00])
-    self.send_packet(37, packet)
+    self.send_packet(0x1b, packet)
 
-  def set_rgbw(self, red, green, blue, white):
+  def set_rgbw(self, white, red, green, blue):
     self.red = red
     self.green = green
     self.blue = blue
     self.white = white
     packet = bytearray([white, red, green, blue])
-    self.send_packet(37, packet)
+    self.send_packet(0x1b, packet)
 
-  def set_effect(self, red, green, blue, white, mode, speed):
+  def set_effect(self, white, red, green, blue, mode, speed):
+    # mode: blink=00, pulse=01, hard rainbow=02, smooth rainbow=03, candle=04, halt=ff
     self.red = red
     self.green = green
     self.blue = blue
     self.white = white
     self.mode = mode
     self.speed = speed
-    packet = bytearray([white, red, green, blue, mode, 0x00, 0x14, speed])
-    self.send_packet(35, packet)
+    packet = bytearray([white, red, green, blue, mode, 0x00, speed, 0])
+    self.send_packet(0x19, packet)
 
   def get_state(self):
-    status = self.device.readCharacteristic(37)
+    status = self.device.readCharacteristic(0x1b)
     if bytearray(status) != bytearray([0, 0, 0, 0]):
         self.power = True
     else:
